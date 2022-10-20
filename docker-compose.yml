@@ -3,11 +3,11 @@ services:
   redis:
     container_name: redis
     image: redis:latest
-
+# WORKER
   celery_worker:
     container_name: celery_worker
     build:
-      context: ./refactoring
+      context: ./repo
       dockerfile: Dockerfile
     command: celery -A celery_worker.celery worker --loglevel=info
     ports:
@@ -20,11 +20,11 @@ services:
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
     depends_on:
       - redis
-
+# FLOWER
   flower:
     container_name: flower
     build:
-      context: ./refactoring
+      context: ./repo
       dockerfile: Dockerfile
     command: celery -A celery_worker.celery flower --port=5555
     ports:
