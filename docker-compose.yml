@@ -1,0 +1,39 @@
+version: "3.8"
+services:
+  redis:
+    container_name: redis
+    image: redis:latest
+
+  celery_worker:
+    container_name: celery_worker
+    build:
+      context: ./refactoring
+      dockerfile: Dockerfile
+    command: celery -A celery_worker.celery worker --loglevel=info
+    ports:
+      - 8888:8888
+      - 6006:6006
+    volumes:
+      - .:/home
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    depends_on:
+      - redis
+
+  flower:
+    container_name: flower
+    build:
+      context: ./refactoring
+      dockerfile: Dockerfile
+    command: celery -A celery_worker.celery flower --port=5555
+    ports:
+      - 5556:5555
+    volumes:
+      - .:/home
+    environment:
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND}
+    depends_on:
+      - redis
+      - celery_worker
